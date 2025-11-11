@@ -105,31 +105,31 @@ inline ImVec4 Jm_mods = ImVec4(1.5f, 2.0f, 1.5f, 2.0f);
 // Draw list
 
 
-#define ICON_FA_TELEGRAM "\xef\x8b\x86"	// U+f2c6
+#define ICON_FA_TELEGRAM "\xef\x8b\x86" // U+f2c6
 #define ICON_FA_EXCLAMATION_TRIANGLE "\xef\x81\xb1" 
 
-		
+                
 float density = -1;
 struct cfg {
     bool aimbot;
-	
+        
     int aim_type = 0;
     int aim_target = 1;
     struct _esp {
         bool Box = false;
         bool Box3D = false;
         bool Line = false;
-		bool Info = false;
-		//bool Egline = false;
+                bool Info = false;
+                //bool Egline = false;
         bool Health = false;
         bool Distance = false;
         bool IsName = false;
         bool Path = false;
         bool Esp360 = false;
         bool Target = false;
-		bool Bypass = false;
-		float LineThickness = 1.7f;   // Thickness of the ESP line
-//	//#pragma once
+                bool Bypass = false;
+                float LineThickness = 1.7f;   // Thickness of the ESP line
+//      //#pragma once
 //#include "imgui.h"
 
 // Global color variable (RGBA, 0..1 floats)
@@ -187,7 +187,7 @@ int showbox = 1;
 struct sColor {
         float circle[4] = {0 / 255.0f, 255 / 255.0f, 0 / 255.0f, 255 / 255.0f};
 
-		float box[4] = {255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f};
+                float box[4] = {255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f};
         float line1[4] = {255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f};
         float box1[4] = {255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f};
         float box3d1[4] = {255 / 255.0f, 255 / 255.0f, 255 / 255.0f, 255 / 255.0f};
@@ -799,13 +799,14 @@ set_aim(local_player, smoothRotation);
 }
 }
 }
-	
+        
 
 inline void DrawESP(float screenWidth, float screenHeight) {
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
         
 
-
+    // Store the counter bottom position for ESP lines
+    static float counterBottomY = 110.0f;
     int totalEnemies = 0;
 
         if (Enable) {
@@ -817,6 +818,7 @@ inline void DrawESP(float screenWidth, float screenHeight) {
             void* camera = Camera_main();
 
             if (players && camera) {
+                // PASS 1: Count enemies only
                 for (int u = 0; u < players->getNumValues(); u++) {
                     void* closestEnemy = players->getValues()[u];
                     if (closestEnemy != local_player && closestEnemy && get_isVisible(closestEnemy) && !get_isLocalTeam(closestEnemy)) {
@@ -829,6 +831,51 @@ inline void DrawESP(float screenWidth, float screenHeight) {
                         if (HeadPosition.z < 1) continue;
                         
                         totalEnemies++;
+                    }
+                }
+                
+                // Render player counter BEFORE drawing ESP lines
+                if (totalEnemies > 0) {
+                    // Only show the number, no background
+                    std::string enemiesCount = std::to_string(totalEnemies);
+                    
+                    float fontSize = 70.0f; // Even bigger font size
+                    ImVec2 textSize = ImGui::CalcTextSize(enemiesCount.c_str());
+                    textSize.x *= (fontSize / 13.0f); // Scale width for larger font
+                    textSize.y *= (fontSize / 13.0f); // Scale height for larger font
+                    
+                    // Position the text at top center
+                    float textX = screenWidth / 2.0f - textSize.x / 2.0f;
+                    float textY = 50.0f;
+                    
+                    // ESP lines start from the BOTTOM edge of the number (touching it)
+                    counterBottomY = textY + textSize.y;
+                    
+                    // Draw each digit with alternating red and green colors
+                    for (size_t i = 0; i < enemiesCount.length(); i++) {
+                        std::string digit(1, enemiesCount[i]);
+                        ImVec2 digitSize = ImGui::CalcTextSize(digit.c_str());
+                        digitSize.x *= (fontSize / 13.0f);
+                        
+                        // Alternate between red and green
+                        ImColor digitColor = (i % 2 == 0) ? ImColor(255, 50, 50) : ImColor(50, 255, 50);
+                        
+                        draw->AddText(NULL, fontSize, ImVec2(textX, textY), digitColor, digit.c_str());
+                        textX += digitSize.x * 0.8f; // Reduce gap between digits
+                    }
+                }
+                
+                // PASS 2: Draw ESP elements for each enemy
+                for (int u = 0; u < players->getNumValues(); u++) {
+                    void* closestEnemy = players->getValues()[u];
+                    if (closestEnemy != local_player && closestEnemy && get_isVisible(closestEnemy) && !get_isLocalTeam(closestEnemy)) {
+                        Vector3 Toepos = getPosition(closestEnemy);
+                        Vector3 Toeposi = WorldToScreenPoint(camera, Toepos);
+                        if (Toeposi.z < 1) continue;
+
+                        Vector3 HeadPos = getPosition(closestEnemy) + Vector3(0, 1.9f, 0);
+                        Vector3 HeadPosition = WorldToScreenPoint(camera, HeadPos);
+                        if (HeadPosition.z < 1) continue;
 
                         
 
@@ -860,7 +907,7 @@ inline void DrawESP(float screenWidth, float screenHeight) {
         }
     }
 }
-	
+        
 if (Up.UpPlayer) {
 if (get_isVisible(local_player)) {
 void *_TeleCarTP = Component_GetTransform(closestEnemy);
@@ -904,7 +951,8 @@ if (Config.ESP.Box) {
 // --- LINE ESP ---
 if (Config.ESP.Line) {
     ImGuiIO& io = ImGui::GetIO();
-    ImVec2 screenCenter = ImVec2(io.DisplaySize.x / 2, 0);
+    // ESP lines now start from below the player counter background
+    ImVec2 screenCenter = ImVec2(io.DisplaySize.x / 2, counterBottomY);
     ImVec2 enemyPos = ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35);
 
     ImColor lineColor = isDown ? ImColor(0,0,0,0) : ImColor(Jm_mods);
@@ -974,20 +1022,17 @@ if (Config.ESP.Distance && !isDown) {   // ✅ Down hai to hide
     draw->AddText(nullptr, 16 * distScale, ImVec2(distX, distY),
                   ImColor(Jm_mods), distanceText.c_str());
 }
-
-    if (totalEnemies > 0) {
-    std::string topText = " PLAYERS: ";
-    std::string enemiesCount = std::to_string(totalEnemies);
-    std::string fullText = topText + enemiesCount;
-
-    // Calculate text size
-    ImVec2 textSize = ImGui::CalcTextSize(fullText.c_str());
-    ImVec2 textPos(screenWidth / 2.0f - textSize.x / 2.0f, 65);  // Align Y with game UI
-
-    // Draw plain white text (to match the in-game "Players 0")
-    draw->AddText(NULL, 30.0f, textPos, ImColor(255, 255, 255), fullText.c_str());
-        
-    }
+                    }
+                }
+                                
+                                
+                                }
+                                
+                                
+                
+                
+                
+    
 }
 
 
@@ -1099,14 +1144,14 @@ if (Config.ESP.Distance) {
 
     }
 }
-                    }
-                }
-				
-				
-				}
-				
-				
-		
-		
-		
+                    
+                
+                                
+                                
+                                
+                                
+                                
+                
+                
+                
     
