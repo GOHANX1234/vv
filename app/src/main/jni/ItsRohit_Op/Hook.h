@@ -805,9 +805,67 @@ inline void DrawESP(float screenWidth, float screenHeight) {
     ImDrawList* draw = ImGui::GetBackgroundDrawList();
         
 
-    // Store the counter bottom position for ESP lines
+    // Store the counter bottom position for ESP lines and box dimensions for counter alignment
     static float counterBottomY = 110.0f;
+    static float dexterBoxY = 10.0f;
+    static float dexterBoxHeight = 40.0f;
     int totalEnemies = 0;
+
+    // ===== DEXXTER BOX - ALWAYS VISIBLE =====
+    {
+        const char* boxText = "DEXXTER";
+        float boxFontSize = 28.0f;
+        
+        // Get proper font metrics for accurate sizing
+        ImFont* font = ImGui::GetFont();
+        float fontScale = boxFontSize / font->FontSize;
+        ImVec2 textSize = font->CalcTextSizeA(boxFontSize, FLT_MAX, 0.0f, boxText);
+        float textHeight = (font->Ascent - font->Descent) * fontScale;
+        
+        // Compact padding for tight fit
+        float boxPaddingX = 10.0f;
+        float boxPaddingY = 6.0f;
+        float boxWidth = textSize.x + (boxPaddingX * 2);
+        float boxHeight = textHeight + (boxPaddingY * 2);
+        float boxX = (screenWidth / 2.0f) - (boxWidth / 2.0f);
+        float boxY = 10.0f;
+        
+        // Store for counter alignment
+        dexterBoxY = boxY;
+        dexterBoxHeight = boxHeight;
+        
+        // Draw black background
+        draw->AddRectFilled(
+            ImVec2(boxX, boxY),
+            ImVec2(boxX + boxWidth, boxY + boxHeight),
+            IM_COL32(0, 0, 0, 255)
+        );
+        
+        // Draw green border
+        draw->AddRect(
+            ImVec2(boxX, boxY),
+            ImVec2(boxX + boxWidth, boxY + boxHeight),
+            IM_COL32(50, 255, 50, 255),
+            0.0f, 0, 2.0f
+        );
+        
+        // Draw thick green line at bottom of box
+        draw->AddLine(
+            ImVec2(boxX, boxY + boxHeight),
+            ImVec2(boxX + boxWidth, boxY + boxHeight),
+            IM_COL32(50, 255, 50, 255),
+            4.0f
+        );
+        
+        // Draw DEXXTER text with perfect centering using font descent adjustment
+        float textX = boxX + (boxWidth - textSize.x) / 2.0f;
+        float textY = boxY + (boxHeight - textHeight) / 2.0f - (font->Descent * fontScale);
+        draw->AddText(NULL, boxFontSize, ImVec2(textX, textY), IM_COL32(255, 255, 255, 255), boxText);
+        
+        // ESP lines will start from the bottom thick green line
+        counterBottomY = boxY + boxHeight;
+    }
+    // ===== END DEXXTER BOX =====
 
         if (Enable) {
         void* current_Match = Curent_Match();
@@ -834,34 +892,43 @@ inline void DrawESP(float screenWidth, float screenHeight) {
                     }
                 }
                 
-                // Render player counter BEFORE drawing ESP lines
+                // Render player counter aligned with DEXXTER box vertical center
                 if (totalEnemies > 0) {
-                    // Only show the number, no background
                     std::string enemiesCount = std::to_string(totalEnemies);
                     
-                    float fontSize = 70.0f; // Even bigger font size
-                    ImVec2 textSize = ImGui::CalcTextSize(enemiesCount.c_str());
-                    textSize.x *= (fontSize / 13.0f); // Scale width for larger font
-                    textSize.y *= (fontSize / 13.0f); // Scale height for larger font
+                    // Use proper font metrics for pixel-perfect positioning
+                    ImFont* font = ImGui::GetFont();
+                    float counterFontSize = 25.0f;
+                    float counterScale = counterFontSize / font->FontSize;
+                    float textHeight = (font->Ascent - font->Descent) * counterScale;
                     
-                    // Position the text at top center
-                    float textX = screenWidth / 2.0f - textSize.x / 2.0f;
-                    float textY = 50.0f;
+                    // Calculate total width of all digits with tight spacing
+                    float totalWidth = 0.0f;
+                    for (size_t i = 0; i < enemiesCount.length(); i++) {
+                        std::string digit(1, enemiesCount[i]);
+                        ImVec2 digitSize = font->CalcTextSizeA(counterFontSize, FLT_MAX, 0.0f, digit.c_str());
+                        totalWidth += digitSize.x;
+                        if (i < enemiesCount.length() - 1) {
+                            totalWidth += digitSize.x * 0.15f; // Tight gap (85% of digit width)
+                        }
+                    }
                     
-                    // ESP lines start from the BOTTOM edge of the number (touching it)
-                    counterBottomY = textY + textSize.y;
+                    // Calculate baseline Y to align with DEXXTER box vertical center
+                    float baselineY = dexterBoxY + (dexterBoxHeight / 2.0f) - (textHeight / 2.0f) - (font->Descent * counterScale);
+                    
+                    // Start X position (centered horizontally)
+                    float currentX = (screenWidth / 2.0f) - (totalWidth / 2.0f);
                     
                     // Draw each digit with alternating red and green colors
                     for (size_t i = 0; i < enemiesCount.length(); i++) {
                         std::string digit(1, enemiesCount[i]);
-                        ImVec2 digitSize = ImGui::CalcTextSize(digit.c_str());
-                        digitSize.x *= (fontSize / 13.0f);
+                        ImVec2 digitSize = font->CalcTextSizeA(counterFontSize, FLT_MAX, 0.0f, digit.c_str());
                         
                         // Alternate between red and green
                         ImColor digitColor = (i % 2 == 0) ? ImColor(255, 50, 50) : ImColor(50, 255, 50);
                         
-                        draw->AddText(NULL, fontSize, ImVec2(textX, textY), digitColor, digit.c_str());
-                        textX += digitSize.x * 0.8f; // Reduce gap between digits
+                        draw->AddText(NULL, counterFontSize, ImVec2(currentX, baselineY), digitColor, digit.c_str());
+                        currentX += digitSize.x + (digitSize.x * 0.15f); // Move to next digit with tight spacing
                     }
                 }
                 
