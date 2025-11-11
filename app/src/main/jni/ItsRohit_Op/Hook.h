@@ -94,6 +94,35 @@ bool UpPlayer = false;
 float UpPos = 0.20f;
 }Up;
 
+bool SpeedHack = false;
+float speedActive = 0.0f;
+float speedDesactive = 0.0f;
+bool speedSaved = false;
+
+void UpdateSpeedhack() {
+    if (Enable) {
+        void* Simulation = GetSimulationTimer();
+     if (Simulation != nullptr) {
+   float FixedDeltaTime = GetTimer(Simulation);
+            if(!speedSaved) {
+                speedActive = FixedDeltaTime * 1.82f;
+                speedDesactive = FixedDeltaTime;
+                speedSaved = true;
+            }
+   if (SpeedHack) {
+       if (FixedDeltaTime != speedActive) {
+                    SetTimer(Simulation, speedActive);
+    }
+   }
+   else {
+       if (FixedDeltaTime != speedDesactive) {
+                    SetTimer(Simulation, speedDesactive);
+    }
+   }
+  }
+ }
+}
+
 #define ICON_FA_TELEGRAM "\xef\x8b\x86" // U+f2c6
 #define ICON_FA_EXCLAMATION_TRIANGLE "\xef\x81\xb1" 
 

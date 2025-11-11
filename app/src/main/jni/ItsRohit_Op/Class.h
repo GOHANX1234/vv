@@ -572,3 +572,26 @@ int get_height() {
 float get_density() {
     return reinterpret_cast<float(__fastcall*)()>(Class_Screen__get_density)();
 }
+
+#define m_Timer (uintptr_t) Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW"), OBFUSCATE("GameFacade"), OBFUSCATE("CurrentGameSimulationTimer"), 0)
+static void* GetSimulationTimer()
+{
+    void* (*_GetSimulationTimer) () = reinterpret_cast<void* (*)()>(m_Timer);
+    return _GetSimulationTimer();
+}
+
+#define m_GetTimer (uintptr_t) Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("GCommon"), OBFUSCATE("TimeService"), OBFUSCATE("get_FixedDeltaTime"), 0)
+static float GetTimer(void* timeServiceInstance)
+{
+    using fnGetFixedDelta = float(*)(void*);
+    auto _GetTimer = reinterpret_cast<fnGetFixedDelta>(m_GetTimer);
+    return _GetTimer(timeServiceInstance);
+}
+
+#define m_SetTimer (uintptr_t) Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("GCommon"), OBFUSCATE("TimeService"), OBFUSCATE("UseFixedDeltaTime"), 1)
+static void SetTimer(void* timeServiceInstance, float fixedDelta)
+{
+    using fnSetFixed = void(*)(void*, float);
+    auto _set_fixed = reinterpret_cast<fnSetFixed>(m_SetTimer);
+    _set_fixed(timeServiceInstance, fixedDelta);
+}
