@@ -453,6 +453,7 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     }
         }
         
+        UpdateSpeedhack();
         DrawESP(g_GlWidth, g_GlHeight);
     
     static bool itsmk = true;
@@ -541,7 +542,7 @@ ImGui::SetNextWindowSize(ImVec2(780, 400), ImGuiCond_Once);
 
 
 
-std::string title = "POWER CHEATS APKMOD MOD MENU VERSON V1.23";
+std::string title = "DEXXTER MOD APK V1";
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 window_pos = ImGui::GetWindowPos();
@@ -602,10 +603,10 @@ ImGui::BeginChild("LeftTabs", ImVec2(220, 0), true);
 {
 // Add vertical tabs
 
-VerticalTab("AIMKILL", 0, &selected_tab);
-VerticalTab("ESP MENU", 1, &selected_tab);
-VerticalTab("BRUTAL", 2, &selected_tab);
-VerticalTab("INFORMATION", 3, &selected_tab);
+VerticalTab("AIM", 0, &selected_tab);
+VerticalTab("ESP", 1, &selected_tab);
+VerticalTab("MORE", 2, &selected_tab);
+VerticalTab("INFO", 3, &selected_tab);
 }
 ImGui::EndChild();
 ImGui::SameLine();
@@ -618,8 +619,8 @@ switch (selected_tab) {
 ImGui::Text("Safe Settings Content");
 break;
 case 0: // AIM
-ImGui::Button(" AIMKILL ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-ImGui::TextColored(ImColor(10, 177, 255, 255),"AIMKILL SETTINGS");
+ImGui::Button(" AIM ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
+ImGui::TextColored(ImColor(10, 177, 255, 255),"AIM SETTINGS");
 ImGui::Separator();
 ImGui::Checkbox("ENABLE AIMKILL ", &Config.Aimbot.aimkill);
 ImGui::Spacing();
@@ -645,43 +646,22 @@ ImGui::Checkbox("DRAW NAME", &Config.ESP.IsName);
 ImGui::SameLine();
 ImGui::ColorEdit3("##NameColor", (float*)&Config.ESP.NameColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
-ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
-
 ImGui::Checkbox("DRAW DSITANCE", &Config.ESP.Distance);
 ImGui::SameLine();
 ImGui::ColorEdit3("##DistanceColor", (float*)&Config.ESP.DistanceColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
+ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
+
 break;
 case 2: // CHAMS
-ImGui::TextColored(ImColor(255, 255, 255, 255),"BRUTAL SETTINGS");
+ImGui::TextColored(ImColor(255, 255, 255, 255),"MORE SETTINGS");
 ImGui::Separator();
-ImGui::Checkbox("ENABLE  MASSKILL", &Mass.Sucks);
-ImGui::Separator();
-ImGui::Checkbox("ENABLE  UP PLAYER", &Up.UpPlayer);
-ImGui::Separator();
-ImGui::Checkbox("ENABLE  SPPED TIMER", &Config.Aimbot.speedon);
+ImGui::Checkbox("ENABLE  SPPED 50X", &SpeedHack);
 break;
 case 3: // INFOS
-ImGui::BulletText("WELCOME TO POWER CHEATS MODS V1.23");
-                                ImGui::Separator();               
-                                ImGui::TextColored(ImVec4(224, 189, 255, 0.35f), "SYTEL BY POWER CHEAT TEAM");
+ImGui::BulletText("WELCOME TO DEXXTER MOD APK V1");
                                 float fps = ImGui::GetIO().Framerate;
-                ImGui::Separator();
                 ImGui::BulletText(" FPS Render Game : %.1f", fps);
-                                ImGui::BulletText(" BRUTAL AIMKILL HIGH ");
-                ImGui::BulletText(" BRUTAL SPPEED  HIGH");
-                                ImGui::Separator();
-                                ImGui::Text("To request a key contact your seller");                            
-                                ImGui::Separator();
-                                ImGui::Text("Key Features :");
-                ImGui::BulletText(" Enhanced Gameplay Tweaks");
-                ImGui::BulletText(" Advance Anti-Cheat System bypass");
-                ImGui::BulletText(" Regular Update And Support");
-                                ImGui::Separator();
-                                ImGui::Text("Thank You For Choosing Us !!!");
-                                ImGui::Separator();
-                                ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "POWER CHEATS - Version 1.0 | © 2025 All Right Reserved");
-                                ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "For Support, Contact your seller");
                                 
 break;
 }
