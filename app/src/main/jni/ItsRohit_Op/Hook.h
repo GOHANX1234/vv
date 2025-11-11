@@ -94,17 +94,6 @@ bool UpPlayer = false;
 float UpPos = 0.20f;
 }Up;
 
-inline ImVec4 Jm_mods = ImVec4(1.5f, 2.0f, 1.5f, 2.0f);
-
-// Globally ya menu ke andar Js_mods color define kar
-//static ImVec3 Js_mods = ImVec3(1.0f, 0.0f, 0.8f); // default pink
-
-// Menu me color picker dikhane ke liye
-//ImGui::ColorEdit3("Text Color", (float*)&Js_mods);
-
-// Draw list
-
-
 #define ICON_FA_TELEGRAM "\xef\x8b\x86" // U+f2c6
 #define ICON_FA_EXCLAMATION_TRIANGLE "\xef\x81\xb1" 
 
@@ -129,10 +118,12 @@ struct cfg {
         bool Target = false;
                 bool Bypass = false;
                 float LineThickness = 1.7f;   // Thickness of the ESP line
-//      //#pragma once
-//#include "imgui.h"
-
-// Global color variable (RGBA, 0..1 floats)
+                
+                // Individual ESP Colors (initialized from Jm_mods for backward compatibility)
+                ImVec4 LineColor = ImVec4(1.5f, 2.0f, 1.5f, 2.0f);     // ESP Line color
+                ImVec4 BoxColor = ImVec4(1.5f, 2.0f, 1.5f, 2.0f);      // ESP Box color
+                ImVec4 NameColor = ImVec4(1.5f, 2.0f, 1.5f, 2.0f);     // ESP Name color
+                ImVec4 DistanceColor = ImVec4(1.5f, 2.0f, 1.5f, 2.0f); // ESP Distance color
 
     }ESP;
 struct _Aimbot {
@@ -892,13 +883,13 @@ inline void DrawESP(float screenWidth, float screenHeight) {
                     }
                 }
                 
-                // Render player counter aligned with DEXXTER box vertical center
+                // Render player counter positioned below DEXXTER box
                 if (totalEnemies > 0) {
                     std::string enemiesCount = std::to_string(totalEnemies);
                     
                     // Use proper font metrics for pixel-perfect positioning
                     ImFont* font = ImGui::GetFont();
-                    float counterFontSize = 25.0f;
+                    float counterFontSize = 45.0f;
                     float counterScale = counterFontSize / font->FontSize;
                     float textHeight = (font->Ascent - font->Descent) * counterScale;
                     
@@ -913,8 +904,10 @@ inline void DrawESP(float screenWidth, float screenHeight) {
                         }
                     }
                     
-                    // Calculate baseline Y to align with DEXXTER box vertical center
-                    float baselineY = dexterBoxY + (dexterBoxHeight / 2.0f) - (textHeight / 2.0f) - (font->Descent * counterScale);
+                    // Calculate baseline Y to position counter below DEXXTER box with proper spacing
+                    float counterSpacing = ImGui::GetStyle().ItemSpacing.y;
+                    float textTop = counterBottomY + counterSpacing;
+                    float baselineY = textTop - (font->Descent * counterScale);
                     
                     // Start X position (centered horizontally)
                     float currentX = (screenWidth / 2.0f) - (totalWidth / 2.0f);
@@ -1000,10 +993,10 @@ if (Config.ESP.Box) {
 
     ImColor boxColor = isDown 
         ? ImColor(0, 0, 0, 0)    // Down hai to transparent
-        : ImColor((ImVec4)Jm_mods);
+        : ImColor((ImVec4)Config.ESP.BoxColor);
 
-    ImColor topColor    = isDown ? ImColor(0,0,0,0) : ImColor(Jm_mods.x, Jm_mods.y, Jm_mods.z, 0.02f);
-    ImColor bottomColor = isDown ? ImColor(0,0,0,0) : ImColor(Jm_mods.x, Jm_mods.y, Jm_mods.z, 1.0f);
+    ImColor topColor    = isDown ? ImColor(0,0,0,0) : ImColor(Config.ESP.BoxColor.x, Config.ESP.BoxColor.y, Config.ESP.BoxColor.z, 0.02f);
+    ImColor bottomColor = isDown ? ImColor(0,0,0,0) : ImColor(Config.ESP.BoxColor.x, Config.ESP.BoxColor.y, Config.ESP.BoxColor.z, 1.0f);
 
     draw->AddRectFilledMultiColor(
         ImVec2(x, y),
@@ -1022,7 +1015,7 @@ if (Config.ESP.Line) {
     ImVec2 screenCenter = ImVec2(io.DisplaySize.x / 2, counterBottomY);
     ImVec2 enemyPos = ImVec2(rect.x + rect.w / 2, rect.y + rect.h / 35);
 
-    ImColor lineColor = isDown ? ImColor(0,0,0,0) : ImColor(Jm_mods);
+    ImColor lineColor = isDown ? ImColor(0,0,0,0) : ImColor(Config.ESP.LineColor);
 
     draw->AddLine(screenCenter, enemyPos, lineColor, Config.ESP.LineThickness);
 }
@@ -1072,7 +1065,7 @@ if (Config.ESP.IsName && !isDown) {   // ✅ Down hai to hide
         float textY = rect.y - (textSize.y * textScale) - 5;   // head se thoda gap
 
         draw->AddText(nullptr, 18 * textScale, ImVec2(textX, textY),
-                      ImColor(Jm_mods), names.c_str());
+                      ImColor(Config.ESP.NameColor), names.c_str());
     }
 }
 
@@ -1087,7 +1080,7 @@ if (Config.ESP.Distance && !isDown) {   // ✅ Down hai to hide
     float distY = rect.y + rect.h + (distSize.y * distScale) + 5;  // feet ke thoda niche
 
     draw->AddText(nullptr, 16 * distScale, ImVec2(distX, distY),
-                  ImColor(Jm_mods), distanceText.c_str());
+                  ImColor(Config.ESP.DistanceColor), distanceText.c_str());
 }
                     }
                 }
@@ -1191,7 +1184,7 @@ if (Config.ESP.IsName) {
         float textX = rect.x + (rect.w / 2) - (textSize.x * textScale / 2);
         float textY = rect.y - textSize.y - 2; // Head ke upar thoda margin
         draw->AddText(nullptr, 18 * textScale, ImVec2(textX, textY),
-                      ImColor(Jm_mods), names.c_str());
+                      ImColor(Config.ESP.NameColor), names.c_str());
     }
 }
 
@@ -1203,7 +1196,7 @@ if (Config.ESP.Distance) {
     float distX = rect.x + (rect.w / 2) - (distSize.x * distScale / 2);
     float distY = rect.y + rect.h + 2; // Pairon ke neeche thoda margin
     draw->AddText(nullptr, 16 * distScale, ImVec2(distX, distY),
-                  ImColor(Jm_mods), distanceText.c_str());
+                  ImColor(Config.ESP.DistanceColor), distanceText.c_str());
 }
 */
 
