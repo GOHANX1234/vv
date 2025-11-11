@@ -241,7 +241,11 @@ static int Tab = 1;
 
 #define ICON_FA_GUN "\xee\x81\xb2"        // Gun icon (Font Awesome 6 me available)
 #define ICON_FA_CROSSHAIRS "\xef\x81\x9b" // Crosshair (sniper/aim ke liye best)
-
+#define ICON_FA_EYE "\xef\x81\xae"        // Eye icon for ESP
+#define ICON_FA_ID_CARD "\xef\x8b\x82"    // ID Card icon for INFO
+#define ICON_FA_ELLIPSIS "\xef\x85\x81"   // Ellipsis icon for MORE
+#define ICON_FA_ARROW_RIGHT "\xef\x81\xa1" // Arrow pointing right for collapsed
+#define ICON_FA_ARROW_LEFT "\xef\x81\xa0"  // Arrow pointing left for expanded
 
 #define ICON_FA_WINDOW_MINIMIZE "\xef\x8a\x96"
 
@@ -354,51 +358,39 @@ bool clearMousePos = true;
 bool ImGuiOK = false;
 bool initImGui = false;
 
-void VerticalTab(const char* label, int tab_index, int* p_selected_tab) {
+void VerticalTab(const char* label, int tab_index, int* p_selected_tab, float buttonWidth, bool isExpanded) {
 ImGuiStyle& style = ImGui::GetStyle();
-ImVec4* colors = style.Colors;
 
-// Push custom colors for the selected and unselected states
-ImVec4 color = ImColor(0, 150, 255, 5);
-ImVec4 colorActive = ImColor(0, 150, 255, 5);
-ImVec4 colorHovered = ImColor(0, 150, 255, 5);
+// Set green color #2EFF2E for all tabs (selected or not)
+ImVec4 greenColor = ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f);
+// Set black color for text to make it visible on green background
+ImVec4 blackColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-if (tab_index == *p_selected_tab) {
-// This is the selected tab, make it blue like in the image
-ImGui::PushStyleColor(ImGuiCol_Button, colorActive);
-ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorActive);
-ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-} else {
-// Unselected tabs are dark
-ImGui::PushStyleColor(ImGuiCol_Button, color);
-ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colorHovered);
-ImGui::PushStyleColor(ImGuiCol_ButtonActive, colorActive);
-}
+// Push green color for button background (all states)
+ImGui::PushStyleColor(ImGuiCol_Button, greenColor);
+ImGui::PushStyleColor(ImGuiCol_ButtonHovered, greenColor);
+ImGui::PushStyleColor(ImGuiCol_ButtonActive, greenColor);
+// Push black color for text (visible on green)
+ImGui::PushStyleColor(ImGuiCol_Text, blackColor);
 
-if (ImGui::Button(label, ImVec2(200, 50))) { // Button size (width, height)
+// Align text: center for collapsed (icon only), left for expanded (icon + text)
+ImVec2 alignment = isExpanded ? ImVec2(0.0f, 0.5f) : ImVec2(0.5f, 0.5f);
+ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, alignment);
+
+if (ImGui::Button(label, ImVec2(buttonWidth, 50))) {
 *p_selected_tab = tab_index;
 }
 
-if (tab_index == *p_selected_tab) {
-ImDrawList* draw_list = ImGui::GetWindowDrawList();
-const ImVec2 p_min = ImGui::GetItemRectMin();
-const ImVec2 p_max = ImGui::GetItemRectMax();
-
-ImU32 line_color = IM_COL32(255, 140, 0, 255);
-float line_thickness = 8.0f;
-
-draw_list->AddLine(
-ImVec2(p_min.x, p_min.y), 
-ImVec2(p_min.x, p_max.y), 
-line_color, 
-line_thickness
-);
-}
-
-ImGui::PopStyleColor(3);
+ImGui::PopStyleVar(1);
+ImGui::PopStyleColor(4);
 }
 
 static int selected_tab = 0;
+
+// Expand/Collapse state variables
+static bool isTabsExpanded = false; // Default: collapsed
+static float currentTabWidth = 70.0f; // Start with collapsed width
+static float targetTabWidth = 70.0f; // Target width for smooth animation
 
 inline EGLBoolean (*old_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
 inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
@@ -597,18 +589,55 @@ std::string title = "DEXXTER MOD APK V1";
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + title_bar_height);
     ImGui::Separator();
     
-ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
-//ImGui::Separator();
-ImGui::BeginChild("LeftTabs", ImVec2(220, 0), true);
-{
-// Add vertical tabs
+// Smooth animation for width transition
+float deltaTime = ImGui::GetIO().DeltaTime;
+float animSpeed = 8.0f; // Animation speed
+float lerpFactor = 1.0f - powf(0.001f, deltaTime * animSpeed); // Smooth exponential lerp
+currentTabWidth = currentTabWidth + (targetTabWidth - currentTabWidth) * lerpFactor;
 
-VerticalTab("AIM", 0, &selected_tab);
-VerticalTab("ESP", 1, &selected_tab);
-VerticalTab("MORE", 2, &selected_tab);
-VerticalTab("INFO", 3, &selected_tab);
+// Snap to target if very close (avoid float oscillation)
+if (fabsf(currentTabWidth - targetTabWidth) < 0.5f) {
+    currentTabWidth = targetTabWidth;
+}
+
+ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
+// Remove border and use animated width for tabs section
+ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+ImGui::BeginChild("LeftTabs", ImVec2(currentTabWidth + 20, 0), false);
+{
+// Add vertical tabs with small spacing between them
+ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 4.0f));
+
+// Toggle button for expand/collapse
+ImVec4 greenColor = ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f);
+ImVec4 blackColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+ImGui::PushStyleColor(ImGuiCol_Button, greenColor);
+ImGui::PushStyleColor(ImGuiCol_ButtonHovered, greenColor);
+ImGui::PushStyleColor(ImGuiCol_ButtonActive, greenColor);
+ImGui::PushStyleColor(ImGuiCol_Text, blackColor);
+
+const char* toggleLabel = isTabsExpanded ? ICON_FA_ARROW_LEFT " Expanded" : ICON_FA_ARROW_RIGHT;
+if (ImGui::Button(toggleLabel, ImVec2(currentTabWidth, 50))) {
+    isTabsExpanded = !isTabsExpanded;
+    targetTabWidth = isTabsExpanded ? 160.0f : 70.0f;
+}
+ImGui::PopStyleColor(4);
+
+// Vertical tabs with dynamic labels
+const char* aimLabel = isTabsExpanded ? ICON_FA_CROSSHAIRS " AIM" : ICON_FA_CROSSHAIRS;
+const char* espLabel = isTabsExpanded ? ICON_FA_EYE " ESP" : ICON_FA_EYE;
+const char* moreLabel = isTabsExpanded ? ICON_FA_ELLIPSIS " MORE" : ICON_FA_ELLIPSIS;
+const char* infoLabel = isTabsExpanded ? ICON_FA_ID_CARD " INFO" : ICON_FA_ID_CARD;
+
+VerticalTab(aimLabel, 0, &selected_tab, currentTabWidth, isTabsExpanded);
+VerticalTab(espLabel, 1, &selected_tab, currentTabWidth, isTabsExpanded);
+VerticalTab(moreLabel, 2, &selected_tab, currentTabWidth, isTabsExpanded);
+VerticalTab(infoLabel, 3, &selected_tab, currentTabWidth, isTabsExpanded);
+
+ImGui::PopStyleVar(1);
 }
 ImGui::EndChild();
+ImGui::PopStyleVar(2); // Pop both WindowPadding and ChildBorderSize
 ImGui::SameLine();
 
 ImGui::BeginChild("mainchild", ImVec2(0, 0), true);
