@@ -328,8 +328,8 @@ colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.00f);
             
           //io.Fonts->AddFontFromMemoryTTF((void *)BaiduZY_data, BaiduZY_size, 30.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
           io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(itsmkop), sizeof(itsmkop), 30.f, &CustomFont);
-		  io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 30.0f, &icons_config, icons_ranges);
-		  io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Custom), sizeof(Custom), 24.f, &CustomFont);
+                  io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 30.0f, &icons_config, icons_ranges);
+                  io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Custom), sizeof(Custom), 24.f, &CustomFont);
          // memset(&Config, 0, sizeof(sConfig));
 //
 
@@ -420,16 +420,16 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
  // Window background = black
 
     ImGuiIO &io = ImGui::GetIO();
-	//Darkness();
-	// Thiết lập màu chủ đề
-	//ImVec4* colors = ImGui::GetStyle().Colors;
+        //Darkness();
+        // Thiết lập màu chủ đề
+        //ImVec4* colors = ImGui::GetStyle().Colors;
 
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
     ImGui::NewFrame();
-	if (ImGuiOK) {
-	    int touchCount = (((int (*)())(Class_Input__get_touchCount))());
+        if (ImGuiOK) {
+            int touchCount = (((int (*)())(Class_Input__get_touchCount))());
     if (touchCount > 0) {
         UnityEngine_Touch_Fields touch = ((UnityEngine_Touch_Fields(*)(int))(Class_Input__GetTouch))(0);
         float reverseY = io.DisplaySize.y - touch.m_Position.fields.y;
@@ -451,9 +451,9 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 break;
         }
     }
-	}
-	
-	DrawESP(g_GlWidth, g_GlHeight);
+        }
+        
+        DrawESP(g_GlWidth, g_GlHeight);
     
     static bool itsmk = true;
 static bool clickInProgress = false;
@@ -632,12 +632,24 @@ case 1: // ESPS
 ImGui::Button(" ESP ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
 ImGui::Separator();
 ImGui::Checkbox("ENABLE ESP", &Enable);
+
 ImGui::Checkbox("DRAW LINE", &Config.ESP.Line);
+ImGui::SameLine();
+ImGui::ColorEdit3("##LineColor", (float*)&Config.ESP.LineColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
 ImGui::Checkbox("DRAW BOX", &Config.ESP.Box);
+ImGui::SameLine();
+ImGui::ColorEdit3("##BoxColor", (float*)&Config.ESP.BoxColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
 ImGui::Checkbox("DRAW NAME", &Config.ESP.IsName);
+ImGui::SameLine();
+ImGui::ColorEdit3("##NameColor", (float*)&Config.ESP.NameColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
 ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
+
 ImGui::Checkbox("DRAW DSITANCE", &Config.ESP.Distance);
-ImGui::ColorEdit3("DRWA ESP COLORS ", (float*)&Jm_mods, ImGuiColorEditFlags_NoInputs);
+ImGui::SameLine();
+ImGui::ColorEdit3("##DistanceColor", (float*)&Config.ESP.DistanceColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
 break;
 case 2: // CHAMS
@@ -651,26 +663,26 @@ ImGui::Checkbox("ENABLE  SPPED TIMER", &Config.Aimbot.speedon);
 break;
 case 3: // INFOS
 ImGui::BulletText("WELCOME TO POWER CHEATS MODS V1.23");
-				ImGui::Separator();               
-				ImGui::TextColored(ImVec4(224, 189, 255, 0.35f), "SYTEL BY POWER CHEAT TEAM");
-				float fps = ImGui::GetIO().Framerate;
+                                ImGui::Separator();               
+                                ImGui::TextColored(ImVec4(224, 189, 255, 0.35f), "SYTEL BY POWER CHEAT TEAM");
+                                float fps = ImGui::GetIO().Framerate;
                 ImGui::Separator();
                 ImGui::BulletText(" FPS Render Game : %.1f", fps);
-				ImGui::BulletText(" BRUTAL AIMKILL HIGH ");
+                                ImGui::BulletText(" BRUTAL AIMKILL HIGH ");
                 ImGui::BulletText(" BRUTAL SPPEED  HIGH");
-				ImGui::Separator();
-				ImGui::Text("To request a key contact your seller");				
-				ImGui::Separator();
-				ImGui::Text("Key Features :");
+                                ImGui::Separator();
+                                ImGui::Text("To request a key contact your seller");                            
+                                ImGui::Separator();
+                                ImGui::Text("Key Features :");
                 ImGui::BulletText(" Enhanced Gameplay Tweaks");
                 ImGui::BulletText(" Advance Anti-Cheat System bypass");
                 ImGui::BulletText(" Regular Update And Support");
-				ImGui::Separator();
-				ImGui::Text("Thank You For Choosing Us !!!");
-				ImGui::Separator();
-				ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "POWER CHEATS - Version 1.0 | © 2025 All Right Reserved");
-				ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "For Support, Contact your seller");
-				
+                                ImGui::Separator();
+                                ImGui::Text("Thank You For Choosing Us !!!");
+                                ImGui::Separator();
+                                ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "POWER CHEATS - Version 1.0 | © 2025 All Right Reserved");
+                                ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "For Support, Contact your seller");
+                                
 break;
 }
 }
@@ -686,12 +698,12 @@ ImGui::EndChild();
 
  
     /*
-	
-	ImDrawList*draw = ImGui::GetBackgroundDrawList();
+        
+        ImDrawList*draw = ImGui::GetBackgroundDrawList();
 
-	ImGui::SetNextWindowSize(ImVec2(720, 660), ImGuiCond_Once);
+        ImGui::SetNextWindowSize(ImVec2(720, 660), ImGuiCond_Once);
 if (ImGui::Begin(OBFUSCATE("POWER CHEAT APKMOD MOD MENU VERSON 1.21 "), 0, ImGuiWindowFlags_NoBringToFrontOnFocus)) {
-   	            
+                    
 // --- Auto-login from clipboard, show background error text if no key or login fails ---
 
 
@@ -717,12 +729,24 @@ ImGui::PopStyleVar(3);
 if (tab == 1) {
 ImGui::TextColored(ImColor(240, 162, 17, 255),"ESP TOTAL SETTINGS");
 ImGui::Checkbox("ENABLE ESP", &Enable);
+
 ImGui::Checkbox("DRAW LINE", &Config.ESP.Line);
+ImGui::SameLine();
+ImGui::ColorEdit3("##LineColor", (float*)&Config.ESP.LineColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
 ImGui::Checkbox("DRAW BOX", &Config.ESP.Box);
+ImGui::SameLine();
+ImGui::ColorEdit3("##BoxColor", (float*)&Config.ESP.BoxColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
 ImGui::Checkbox("DRAW NAME", &Config.ESP.IsName);
+ImGui::SameLine();
+ImGui::ColorEdit3("##NameColor", (float*)&Config.ESP.NameColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
 ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
+
 ImGui::Checkbox("DRAW DSITANCE", &Config.ESP.Distance);
-ImGui::ColorEdit3("DRWA ESP COLORS ", (float*)&Jm_mods, ImGuiColorEditFlags_NoInputs);
+ImGui::SameLine();
+ImGui::ColorEdit3("##DistanceColor", (float*)&Config.ESP.DistanceColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
 }
 if (tab == 2) {
@@ -742,27 +766,27 @@ ImGui::Checkbox("ENABLE  MASSKILL", &Mass.Sucks);
 if (tab == 3) {
 ImGui::TextColored(ImColor(240, 162, 25, 177),"INFO MODS SETTINGS");
 ImGui::BulletText("WELCOME TO POWER CHEATS MODS V1.22");
-				ImGui::Separator();               
-				ImGui::TextColored(ImVec4(224, 189, 255, 0.35f), "SYTEL BY POWER CHEAT TEAM");
-				float fps = ImGui::GetIO().Framerate;
+                                ImGui::Separator();               
+                                ImGui::TextColored(ImVec4(224, 189, 255, 0.35f), "SYTEL BY POWER CHEAT TEAM");
+                                float fps = ImGui::GetIO().Framerate;
 ImGui::Separator();
 ImGui::BulletText(" FPS Render Game : %.1f", fps);
-				ImGui::BulletText(" BRUTAL AIMKILL HIGH ");
+                                ImGui::BulletText(" BRUTAL AIMKILL HIGH ");
                 ImGui::BulletText(" BRUTAL SPPEED  HIGH");
-				ImGui::Separator();
-				ImGui::Text("To request a key contact your seller");
-				
-				ImGui::Separator();
-				ImGui::Text("Key Features :");
+                                ImGui::Separator();
+                                ImGui::Text("To request a key contact your seller");
+                                
+                                ImGui::Separator();
+                                ImGui::Text("Key Features :");
                 ImGui::BulletText(" Enhanced Gameplay Tweaks");
                 ImGui::BulletText(" Advance Anti-Cheat System");
                 ImGui::BulletText(" Regular Update And Support");
-				ImGui::Separator();
-				ImGui::Text("Thank You For Choosing Us !!!");
-				ImGui::Separator();
-				ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "POWER CHEATS - Version 1.0 | © 2025 All Right Reserved");
-				ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "For Support, Contact your seller");
-				
+                                ImGui::Separator();
+                                ImGui::Text("Thank You For Choosing Us !!!");
+                                ImGui::Separator();
+                                ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "POWER CHEATS - Version 1.0 | © 2025 All Right Reserved");
+                                ImGui::TextColored(ImVec4(133, 137, 143, 0.35f), "For Support, Contact your seller");
+                                
 }
 }
 }
@@ -802,7 +826,7 @@ inline void StartGUI() {
     if (NULL != ptr_eglSwapBuffer) {
         DobbyHook((void *)ptr_eglSwapBuffer, (void*)hook_eglSwapBuffers, (void**)&old_eglSwapBuffers);
             LOGD("Gui Started");
-			hack_injec();
+                        hack_injec();
         }
     }
 
@@ -941,13 +965,13 @@ bool is_current_process(const char* target_name) {
 
 
 void hack_injec() {
-	while (!unityMap.isValid()) {
+        while (!unityMap.isValid()) {
         unityMap = KittyMemory::getLibraryBaseMap("libunity.so");
-		anogsMap = KittyMemory::getLibraryBaseMap("libanogs.so");
-		il2cppMap = KittyMemory::getLibraryBaseMap("libil2cpp.so");
-		
+                anogsMap = KittyMemory::getLibraryBaseMap("libanogs.so");
+                il2cppMap = KittyMemory::getLibraryBaseMap("libil2cpp.so");
+                
         sleep(6);
-	}
+        }
     
  sleep(5);
     Il2CppAttach();
@@ -976,11 +1000,11 @@ void hack_injec() {
 
 
 void hack_thread(pid_t pid) {
-	
-	StartGUI();
-	while(pid == -1){pid = get_pid_by_name("com.dts.freefireth");} 
-	remote_inject(pid);
-	writeLog(to_string(pid));
+        
+        StartGUI();
+        while(pid == -1){pid = get_pid_by_name("com.dts.freefireth");} 
+        remote_inject(pid);
+        writeLog(to_string(pid));
     
 }
 
