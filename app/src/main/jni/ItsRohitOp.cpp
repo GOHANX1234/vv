@@ -265,8 +265,8 @@ ImGui::GetStyle().WindowPadding = ImVec2(8, 8);
 ImGui::GetStyle().FramePadding = ImVec2(10, 10);
 ImGui::GetStyle().ItemSpacing = ImVec2(10, 10);
 ImGui::GetStyle().FrameBorderSize = 0.0f;
-ImGui::GetStyle().WindowBorderSize = 1.0f;
-ImGui::GetStyle().TabBorderSize = 1.0f;
+ImGui::GetStyle().WindowBorderSize = 0.0f;
+ImGui::GetStyle().TabBorderSize = 0.0f;
 ImGui::GetStyle().ScrollbarSize = 20.0f;
 
 // Setup Platform/Renderer backends
@@ -286,7 +286,7 @@ ImVec4 pureOrange = ImVec4(1.0f, 0.647f, 0.0f, 1.0f);
 
 // Update colors
 colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-colors[ImGuiCol_Border] = ImColor(5, 106, 153, 200);  // Keep the border color (can change if needed)
+colors[ImGuiCol_Border] = ImColor(255, 255, 255, 200);  // White border color
 colors[ImGuiCol_Tab] = pureOrange;
 colors[ImGuiCol_TabHovered] = ImVec4(1.0f, 0.647f, 0.0f, 0.8f);  // Hover state of Tab
 colors[ImGuiCol_TabActive] = pureOrange;
@@ -555,7 +555,7 @@ if (!isLogin) {
 }} else {
 
 if (itsmk){
-ImGui::SetNextWindowSize(ImVec2(780, 400), ImGuiCond_Once);
+ImGui::SetNextWindowSize(ImVec2(740, 400), ImGuiCond_Once);
     if (ImGui::Begin(" ~ Wave Mods", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar)) {
 
 
@@ -568,11 +568,11 @@ std::string title = "DEXXTER MOD APK V1";
     float title_bar_height = 45.0f;
     float vertical_offset = 6.0f;
 
-    // Corrected the alpha value to 255 for full opacity.
+    // Pure black background for header section
     draw_list->AddRectFilled(
         window_pos,
         ImVec2(window_pos.x + window_width, window_pos.y + title_bar_height),
-        IM_COL32(30, 30, 30, 255) 
+        IM_COL32(0, 0, 0, 255) 
     );
 
     float circle_radius = 15.0f;
@@ -613,7 +613,6 @@ std::string title = "DEXXTER MOD APK V1";
     draw_list->AddText(ImVec2(text_x, text_y), IM_COL32(255, 255, 255, 255), title.c_str());
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + title_bar_height);
-    ImGui::Separator();
     
 // Smooth animation for width transition
 float deltaTime = ImGui::GetIO().DeltaTime;
@@ -683,7 +682,9 @@ ImGui::EndChild();
 ImGui::PopStyleVar(2); // Pop both WindowPadding and ChildBorderSize
 ImGui::SameLine();
 
-ImGui::BeginChild("mainchild", ImVec2(0, 0), true);
+// Remove window padding for perfect alignment
+ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+ImGui::BeginChild("mainchild", ImVec2(0, 0), false);
 
 {
 
@@ -691,9 +692,16 @@ switch (selected_tab) {
 ImGui::Text("Safe Settings Content");
 break;
 case 0: // AIM
+ImGui::Dummy(ImVec2(0, 0.5f));
+ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
+ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
+ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
 ImGui::Button(" AIM ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-ImGui::TextColored(ImColor(10, 177, 255, 255),"AIM SETTINGS");
+ImGui::PopStyleColor(3);
+ImGui::PopStyleVar();
 ImGui::Separator();
+ImGui::Spacing();
 ImGui::Checkbox("ENABLE AIMKILL ", &Config.Aimbot.aimkill);
 ImGui::Spacing();
 
@@ -702,8 +710,16 @@ ImGui::Spacing();
 // ImGui::PopItemWidth();
 break;
 case 1: // ESPS
+ImGui::Dummy(ImVec2(0, 0.5f));
+ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
+ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
+ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
 ImGui::Button(" ESP ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
+ImGui::PopStyleColor(3);
+ImGui::PopStyleVar();
 ImGui::Separator();
+ImGui::Spacing();
 ImGui::Checkbox("ENABLE ESP", &Enable);
 
 ImGui::Checkbox("DRAW LINE", &Config.ESP.Line);
@@ -725,9 +741,17 @@ ImGui::ColorEdit3("##DistanceColor", (float*)&Config.ESP.DistanceColor, ImGuiCol
 ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
 
 break;
-case 2: // CHAMS
-ImGui::TextColored(ImColor(255, 255, 255, 255),"MORE SETTINGS");
+case 2: // MORE
+ImGui::Dummy(ImVec2(0, 0.5f));
+ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
+ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
+ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
+ImGui::Button(" MORE ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
+ImGui::PopStyleColor(3);
+ImGui::PopStyleVar();
 ImGui::Separator();
+ImGui::Spacing();
 ImGui::Checkbox("ENABLE  SPPED 50X", &SpeedHack);
 break;
 case 3: // INFOS
@@ -739,6 +763,7 @@ break;
 }
 }
 ImGui::EndChild();
+ImGui::PopStyleVar(); // Pop WindowPadding
         
 
 }
