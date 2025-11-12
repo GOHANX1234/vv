@@ -300,7 +300,7 @@ colors[ImGuiCol_FrameBgActive] = ImVec4(0.40f, 0.40f, 0.40f, 0.67f);
 
 // Title Backgrounds, Buttons, and Sliders
 colors[ImGuiCol_TitleBgActive] = pureOrange;  // Active title background color
-colors[ImGuiCol_CheckMark] = pureOrange;
+colors[ImGuiCol_CheckMark] = ImVec4(0.0f, 1.0f, 0.0f, 1.0f); // Green checkmark
 colors[ImGuiCol_SliderGrab] = pureOrange;
 colors[ImGuiCol_SliderGrabActive] = pureOrange;
 colors[ImGuiCol_Button] = ImVec4(1.0f, 0.647f, 0.0f, 0.8f);  // Button with slight transparency
@@ -482,7 +482,7 @@ if (ImGui::Begin((" MKOP" ), 0,ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_
 const auto& pWindowDrawList = ImGui::GetWindowDrawList();
 const auto& p = ImGui::GetWindowPos();
 ImGui::SetCursorPos(ImVec2(5, 5));
-ImVec2 imageSize(120,120);
+ImVec2 imageSize(80,80);
 ImGui::Image(mkop.textureId, imageSize);
 if (ImGui::IsItemHovered()) {
 if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {clickInProgress = true;
@@ -555,7 +555,7 @@ if (!isLogin) {
 }} else {
 
 if (itsmk){
-ImGui::SetNextWindowSize(ImVec2(740, 400), ImGuiCond_Once);
+ImGui::SetNextWindowSize(ImVec2(685, 400), ImGuiCond_Once);
     if (ImGui::Begin(" ~ Wave Mods", 0, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar)) {
 
 
@@ -725,9 +725,9 @@ case 1: // ESPS
 
     // Calculate layout dimensions
     float colorBoxSize = 30.0f;
-    float columnGap = 60.0f;
+    float leftColumnWidth = 224.0f;
 
-    // LEFT COLUMN - BeginGroup for precise control
+    // LEFT COLUMN
     ImGui::BeginGroup();
     {
         // ENABLE ESP
@@ -751,12 +751,8 @@ case 1: // ESPS
     }
     ImGui::EndGroup();
 
-    // Get the starting Y position of left column for alignment
-    float leftGroupStartY = ImGui::GetItemRectMin().y;
-
-    // RIGHT COLUMN - Position and create second group
-    ImGui::SameLine(0.0f, columnGap);
-    ImGui::SetCursorPosY(leftGroupStartY);
+    // RIGHT COLUMN - Use SameLine with proper spacing
+    ImGui::SameLine(leftColumnWidth);
     ImGui::BeginGroup();
     {
         // DRAW NAME (aligns with ENABLE ESP)
@@ -767,7 +763,7 @@ case 1: // ESPS
         ImGui::PopItemWidth();
         
         // DRAW DISTANCE (aligns with DRAW LINE)
-        ImGui::Checkbox("DRAW DSITANCE", &Config.ESP.Distance);
+        ImGui::Checkbox("DRAW DIST", &Config.ESP.Distance);
         ImGui::SameLine();
         ImGui::PushItemWidth(colorBoxSize);
         ImGui::ColorEdit3("##DistanceColor", (float*)&Config.ESP.DistanceColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
