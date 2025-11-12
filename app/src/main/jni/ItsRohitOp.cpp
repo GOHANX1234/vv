@@ -62,8 +62,9 @@ struct LoginState {
     char key[128];
     std::string error;
     bool isSubmitting;
+    bool updateModalShown;
     
-    LoginState() : isAuthenticated(false), isSubmitting(false) {
+    LoginState() : isAuthenticated(false), isSubmitting(false), updateModalShown(false) {
         key[0] = '\0';
     }
 } loginState;
@@ -148,7 +149,7 @@ class MyModule : public zygisk::ModuleBase {
   void onLoad(Api *api, JNIEnv *env) override {
     this->api_ = api;
     this->env_ = env;
-    genv = env;
+    Tools::genv = env;
    // gEnv = env;
 
   }
@@ -169,7 +170,7 @@ class MyModule : public zygisk::ModuleBase {
 
   void postAppSpecialize(const AppSpecializeArgs *args) override {
     if (is_game_) {
-       genv->GetJavaVM(&jvm);
+       Tools::genv->GetJavaVM(&Tools::jvm);
      //  genv->GetJavaVM(&gJvm);
       std::thread{hack}.detach();
     }
@@ -594,7 +595,7 @@ if (!loginState.isAuthenticated) {
         
         // Paste button
         if (ImGui::Button(ICON_FA_CLIPBOARD " Paste", ImVec2(buttonWidth, buttonHeight))) {
-            std::string clipText = getClipboard();
+            std::string clipText = Tools::getClipboard();
             if (!clipText.empty()) {
                 auto l = clipText.find_first_not_of(" \r\n\t");
                 auto r = clipText.find_last_not_of(" \r\n\t");
@@ -618,7 +619,7 @@ if (!loginState.isAuthenticated) {
         
         if (ImGui::Button(ICON_FA_SIGN_IN " Login", ImVec2(buttonWidth, buttonHeight)) && canLogin) {
             loginState.isSubmitting = true;
-            std::string result = Login(loginState.key);
+            std::string result = Tools::Login(loginState.key);
             loginState.isSubmitting = false;
             
             if (result == "OK") {
@@ -647,6 +648,128 @@ if (!loginState.isAuthenticated) {
     
     ImGui::End();
     ImGui::PopStyleVar(2);
+} else if (bHasUpdate && !loginState.updateModalShown && !Tools::g_Updates.empty()) {
+    // 🎨 BEAUTIFUL UPDATE PAGE - NEW DESIGN 🎨
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
+    
+    ImGui::SetNextWindowSize(ImVec2(520, 420), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(25, 25));
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 2.0f);
+    ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.0f, 1.0f, 0.0f, 0.8f));
+    
+    if (ImGui::Begin("##UpdateModal", nullptr, 
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | 
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar)) {
+        
+        float windowWidth = ImGui::GetWindowWidth() - 50;
+        static float pulseAnimation = 0.0f;
+        pulseAnimation += ImGui::GetIO().DeltaTime * 2.0f;
+        
+        for (size_t i = 0; i < Tools::g_Updates.size(); i++) {
+            auto& update = Tools::g_Updates[i];
+            
+            // 🎯 Animated Header with Glow Effect
+            ImDrawList* draw = ImGui::GetWindowDrawList();
+            ImVec2 headerStart = ImGui::GetCursorScreenPos();
+            
+            float glowIntensity = 0.7f + 0.3f * sinf(pulseAnimation);
+            ImU32 glowColor = IM_COL32(0, (int)(255 * glowIntensity), 0, 100);
+            
+            // Glow background
+            draw->AddRectFilled(
+                ImVec2(headerStart.x - 10, headerStart.y - 10),
+                ImVec2(headerStart.x + windowWidth + 10, headerStart.y + 60),
+                glowColor,
+                8.0f
+            );
+            
+            // Main header background
+            draw->AddRectFilled(
+                headerStart,
+                ImVec2(headerStart.x + windowWidth, headerStart.y + 50),
+                IM_COL32(0, 200, 0, 255),
+                8.0f
+            );
+            
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10);
+            
+            // Update icon and title
+            ImGui::PushFont(F48 ? F48 : ImGui::GetFont());
+            std::string titleText = ICON_FA_ROCKET " " + update.title;
+            ImVec2 titleSize = ImGui::CalcTextSize(titleText.c_str());
+            ImGui::SetCursorPosX((ImGui::GetWindowWidth() - titleSize.x) * 0.5f);
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::Text("%s", titleText.c_str());
+            ImGui::PopStyleColor();
+            ImGui::PopFont();
+            
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 40);
+            ImGui::Spacing();
+            ImGui::Spacing();
+            
+            // 📝 Message Section with styled background
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.1f, 0.1f, 0.1f, 0.9f));
+            ImGui::BeginChild("##UpdateMessage", ImVec2(windowWidth, 140), true, ImGuiWindowFlags_NoScrollbar);
+            
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + windowWidth - 30);
+            ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10);
+            ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10);
+            ImGui::TextWrapped("%s", update.message.c_str());
+            ImGui::PopTextWrapPos();
+            ImGui::PopStyleColor();
+            
+            ImGui::EndChild();
+            ImGui::PopStyleColor();
+            
+            ImGui::Spacing();
+            ImGui::Spacing();
+            
+            // 🎮 Action Buttons with Gradient Effect
+            float buttonHeight = 55.0f;
+            
+            // Download button with pulsing effect
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.8f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.0f, 0.6f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+            
+            std::string downloadBtnText = ICON_FA_DOWNLOAD "  " + update.buttonText + "  " + ICON_FA_DOWNLOAD;
+            
+            if (ImGui::Button(downloadBtnText.c_str(), ImVec2(windowWidth, buttonHeight))) {
+                Tools::OpenURL(update.linkUrl.c_str());
+            }
+            
+            ImGui::PopStyleColor(4);
+            ImGui::PopStyleVar();
+            
+            ImGui::Spacing();
+            
+            // Later button
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.8f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+            
+            if (ImGui::Button(ICON_FA_CLOCK " Continue Without Updating", ImVec2(windowWidth, 40))) {
+                loginState.updateModalShown = true;
+            }
+            
+            ImGui::PopStyleColor(4);
+            ImGui::PopStyleVar();
+        }
+    }
+    
+    ImGui::End();
+    ImGui::PopStyleColor();
+    ImGui::PopStyleVar(3);
 } else {
 
 if (itsmk){
@@ -1228,7 +1351,7 @@ void hack_thread(pid_t pid) {
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void * reserved) {
-jvm = vm;
+Tools::jvm = vm;
 JNIEnv *env;
 vm->GetEnv((void **) &env, JNI_VERSION_1_6); 
 return JNI_VERSION_1_6;
