@@ -55,6 +55,8 @@ ImFont* F50 = nullptr;
 ImFont* JAAT = nullptr;
 float menu[4] = { 0/255.f, 255/255.f, 0/255.f, 1.000f };
 
+ImVec4 g_MenuAccentColor = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+
 
 //static int TAB = 1;
 
@@ -377,14 +379,24 @@ void VerticalTab(const char* icon, const char* text, int tab_index, int* p_selec
         *p_selected_tab = tab_index;
     }
     
-    // Colors with selection and hover states
-    ImVec4 greenColor = ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f);
-    ImVec4 greenHover = ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f); // Brighter green on hover
-    ImVec4 greenSelected = ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f); // Slightly darker when selected
+    // Dynamic colors based on g_MenuAccentColor
+    ImVec4 accentColor = g_MenuAccentColor;
+    ImVec4 accentHover = ImVec4(
+        fminf(accentColor.x + 0.1f, 1.0f),
+        fminf(accentColor.y + 0.1f, 1.0f),
+        fminf(accentColor.z + 0.1f, 1.0f),
+        1.0f
+    );
+    ImVec4 accentSelected = ImVec4(
+        fmaxf(accentColor.x - 0.1f, 0.0f),
+        fmaxf(accentColor.y - 0.1f, 0.0f),
+        fmaxf(accentColor.z - 0.1f, 0.0f),
+        1.0f
+    );
     ImVec4 blackColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
     
     // Choose background color based on state
-    ImVec4 bgColorVec = isSelected ? greenSelected : (isHovered ? greenHover : greenColor);
+    ImVec4 bgColorVec = isSelected ? accentSelected : (isHovered ? accentHover : accentColor);
     ImU32 bgColor = ImGui::ColorConvertFloat4ToU32(bgColorVec);
     
     // Draw button background
@@ -446,6 +458,36 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
     ImGui::NewFrame();
+    
+    ImVec4 accentPrimary = g_MenuAccentColor;
+    ImVec4 accentHover = ImVec4(
+        fminf(accentPrimary.x + 0.1f, 1.0f),
+        fminf(accentPrimary.y + 0.1f, 1.0f),
+        fminf(accentPrimary.z + 0.1f, 1.0f),
+        1.0f
+    );
+    ImVec4 accentActive = ImVec4(
+        fmaxf(accentPrimary.x - 0.1f, 0.0f),
+        fmaxf(accentPrimary.y - 0.1f, 0.0f),
+        fmaxf(accentPrimary.z - 0.0f, 0.0f),
+        1.0f
+    );
+    ImVec4 accentTransparent = ImVec4(accentPrimary.x, accentPrimary.y, accentPrimary.z, 0.8f);
+    
+    ImVec4* colors = ImGui::GetStyle().Colors;
+    colors[ImGuiCol_CheckMark] = accentPrimary;
+    colors[ImGuiCol_Tab] = accentPrimary;
+    colors[ImGuiCol_TabHovered] = accentHover;
+    colors[ImGuiCol_TabActive] = accentPrimary;
+    colors[ImGuiCol_Button] = accentTransparent;
+    colors[ImGuiCol_ButtonHovered] = accentPrimary;
+    colors[ImGuiCol_ButtonActive] = accentActive;
+    colors[ImGuiCol_SliderGrab] = accentPrimary;
+    colors[ImGuiCol_SliderGrabActive] = accentPrimary;
+    colors[ImGuiCol_Header] = accentTransparent;
+    colors[ImGuiCol_HeaderHovered] = accentHover;
+    colors[ImGuiCol_HeaderActive] = accentPrimary;
+    
         if (ImGuiOK) {
             int touchCount = (((int (*)())(Class_Input__get_touchCount))());
     if (touchCount > 0) {
@@ -653,11 +695,10 @@ if (toggleClicked) {
     targetTabWidth = isTabsExpanded ? 140.0f : 70.0f;
 }
 
-// Draw toggle button background
+// Draw toggle button background with dynamic color
 ImDrawList* toggleDrawList = ImGui::GetWindowDrawList();
-ImVec4 greenColor = ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f);
 ImVec4 blackColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-ImU32 toggleBgColor = ImGui::ColorConvertFloat4ToU32(greenColor);
+ImU32 toggleBgColor = ImGui::ColorConvertFloat4ToU32(g_MenuAccentColor);
 toggleDrawList->AddRectFilled(togglePos, ImVec2(togglePos.x + currentTabWidth, togglePos.y + 60), toggleBgColor, ImGui::GetStyle().FrameRounding);
 
 // Draw toggle icon centered
@@ -694,12 +735,9 @@ break;
 case 0: // AIM
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
     ImGui::Button(" AIM ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-    ImGui::PopStyleColor(4);
+    ImGui::PopStyleColor(1);
     ImGui::PopStyleVar();
     ImGui::Separator();
     ImGui::Spacing();
@@ -713,12 +751,9 @@ case 0: // AIM
 case 1: // ESPS
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
     ImGui::Button(" ESP ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-    ImGui::PopStyleColor(4);
+    ImGui::PopStyleColor(1);
     ImGui::PopStyleVar();
     ImGui::Separator();
     ImGui::Spacing();
@@ -779,12 +814,9 @@ case 1: // ESPS
 case 2: // MORE
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
     ImGui::Button(" MORE ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-    ImGui::PopStyleColor(4);
+    ImGui::PopStyleColor(1);
     ImGui::PopStyleVar();
     ImGui::Separator();
     ImGui::Spacing();
@@ -794,18 +826,27 @@ case 2: // MORE
 case 3: // INFOS
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
     ImGui::Button(" INFO ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-    ImGui::PopStyleColor(4);
+    ImGui::PopStyleColor(1);
     ImGui::PopStyleVar();
     ImGui::Separator();
     ImGui::Spacing();
-    ImGui::BulletText("WELCOME TO DEXXTER MOD APK V1");
+    
+    ImGui::PushFont(ImGui::GetFont());
+    
+    ImGui::Text(ICON_FA_PALETTE " MENU COLOR");
+    ImGui::SameLine();
+    float colorBoxSize = 60.0f;
+    ImGui::PushItemWidth(colorBoxSize);
+    ImGui::ColorEdit3("##MenuAccentColor", (float*)&g_MenuAccentColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    ImGui::PopItemWidth();
+    
     float fps = ImGui::GetIO().Framerate;
-    ImGui::BulletText(" FPS Render Game : %.1f", fps);
+    ImGui::Text(ICON_FA_TACHOMETER " FPS Render Game: %.1f", fps);
+    
+    ImGui::PopFont();
+    
     break;
 }
 }
