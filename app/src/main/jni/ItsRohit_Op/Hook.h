@@ -861,20 +861,12 @@ inline void DrawESP(float screenWidth, float screenHeight) {
             IM_COL32(0, 0, 0, 255)
         );
         
-        // Draw green border
+        // Draw thick green border on all sides
         draw->AddRect(
             ImVec2(boxX, boxY),
             ImVec2(boxX + boxWidth, boxY + boxHeight),
             IM_COL32(50, 255, 50, 255),
-            0.0f, 0, 2.0f
-        );
-        
-        // Draw thick green line at bottom of box
-        draw->AddLine(
-            ImVec2(boxX, boxY + boxHeight),
-            ImVec2(boxX + boxWidth, boxY + boxHeight),
-            IM_COL32(50, 255, 50, 255),
-            4.0f
+            0.0f, 0, 4.0f
         );
         
         // Draw DEXXTER text with perfect centering using font descent adjustment
