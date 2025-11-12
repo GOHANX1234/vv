@@ -57,6 +57,16 @@ float menu[4] = { 0/255.f, 255/255.f, 0/255.f, 1.000f };
 
 ImVec4 g_MenuAccentColor = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
 
+struct LoginState {
+    bool isAuthenticated;
+    char key[128];
+    std::string error;
+    bool isSubmitting;
+    
+    LoginState() : isAuthenticated(false), isSubmitting(false) {
+        key[0] = '\0';
+    }
+} loginState;
 
 //static int TAB = 1;
 
@@ -537,64 +547,107 @@ if (clickDuration < 0.2f) {itsmk = true;
 
 ImGui::End();
 
-static bool isLogin = true;
-static bool attemptedAuto = false; // avoid repeating auto-login attempts each frame
-static std::string lastErr;       // last error to show on background
-
-if (!isLogin) {
-    // Try auto-login once when there's something in clipboard
-    std::string clip = getClipboard(); // your helper, returns std::string
-
-    if (!clip.empty() && !attemptedAuto) {
-        attemptedAuto = true;
-        // Trim whitespace (optional)
-        auto l = clip.find_first_not_of(" \r\n\t");
-        auto r = clip.find_last_not_of(" \r\n\t");
-        std::string key = (l == std::string::npos) ? std::string() : clip.substr(l, r - l + 1);
-
-        // Try login with clipboard key directly
-        lastErr = Login(key.c_str()); // assume Login returns "OK" or error string
-        if (lastErr == "OK") {
-            // mark logged in — adjust your real validation if needed
-            isLogin = true;
-        } else {
-            // keep isLogin false and show error in background
-            isLogin = false;
-        }
-    }
-
-    // If clipboard empty and we have not yet attempted auto (or it's empty every frame),
-    // show big background error text "ERROR KEY".
-    ImDrawList* bg = ImGui::GetBackgroundDrawList();
-    ImVec2 screen = ImGui::GetIO().DisplaySize;
-    const char* errText = nullptr;
-
-    if (!clip.empty() && attemptedAuto && !isLogin) {
-        // there was a clipboard key but login failed — show server error message if any
-        if (!lastErr.empty()) {
-            errText = lastErr.c_str(); // show server error (e.g. "Invalid key")
-        } else {
-            errText = "LOGIN FAILED";
-        }
-    } else if (clip.empty()) {
-        errText = "ERROR KEY";
-    }
-
-    if (errText != nullptr) {
-        // Choose a large font size (in pixels) and center the text
-        float fontSize = 40.0f; // adjust as needed
-        ImFont* font = ImGui::GetFont(); // default font
-        ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, errText);
-        ImVec2 pos = ImVec2((screen.x - textSize.x) * 0.5f, (screen.y - textSize.y) * 0.45f);
-
-        // Semi-transparent red-ish color
-        ImU32 col = ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 0.12f, 0.12f, 0.85f));
-        bg->AddText(font, fontSize, pos, col, errText);
+if (!loginState.isAuthenticated) {
+    // Show centered login modal
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
     
-
-    // DO NOT show the login controls at all (per your request).
-    // If you still want a hidden fallback to paste manually, you could keep the InputText hidden or behind a keybind.
-}} else {
+    ImGui::SetNextWindowSize(ImVec2(440, 280), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(20, 20));
+    
+    if (ImGui::Begin("##LoginModal", nullptr, 
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | 
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar)) {
+        
+        float windowWidth = ImGui::GetWindowWidth();
+        
+        // Title with icon
+        ImGui::PushStyleColor(ImGuiCol_Text, g_MenuAccentColor);
+        ImVec2 titleSize = ImGui::CalcTextSize(ICON_FA_LOCK " Login Required!!");
+        ImGui::SetCursorPosX((windowWidth - titleSize.x) * 0.5f);
+        ImGui::Text(ICON_FA_LOCK " Login Required!!");
+        ImGui::PopStyleColor();
+        
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        
+        // Key input box
+        ImGui::Text(ICON_FA_KEY " Key:");
+        ImGui::PushItemWidth(-1);
+        ImGui::InputTextWithHint("##KeyInput", "Enter your activation key", 
+            loginState.key, IM_ARRAYSIZE(loginState.key));
+        ImGui::PopItemWidth();
+        
+        ImGui::Spacing();
+        
+        // Buttons row
+        float buttonWidth = (windowWidth - 60) / 2.0f;
+        float buttonHeight = 40.0f;
+        
+        // Push style for better text centering
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 8));
+        
+        // Paste button
+        if (ImGui::Button(ICON_FA_CLIPBOARD " Paste", ImVec2(buttonWidth, buttonHeight))) {
+            std::string clipText = getClipboard();
+            if (!clipText.empty()) {
+                auto l = clipText.find_first_not_of(" \r\n\t");
+                auto r = clipText.find_last_not_of(" \r\n\t");
+                std::string trimmed = (l == std::string::npos) ? std::string() : clipText.substr(l, r - l + 1);
+                
+                if (!trimmed.empty()) {
+                    strncpy(loginState.key, trimmed.c_str(), sizeof(loginState.key) - 1);
+                    loginState.key[sizeof(loginState.key) - 1] = '\0';
+                    loginState.error.clear();
+                }
+            }
+        }
+        
+        ImGui::SameLine();
+        
+        // Login button
+        bool canLogin = strlen(loginState.key) > 0 && !loginState.isSubmitting;
+        if (!canLogin) {
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.5f);
+        }
+        
+        if (ImGui::Button(ICON_FA_SIGN_IN " Login", ImVec2(buttonWidth, buttonHeight)) && canLogin) {
+            loginState.isSubmitting = true;
+            std::string result = Login(loginState.key);
+            loginState.isSubmitting = false;
+            
+            if (result == "OK") {
+                loginState.isAuthenticated = true;
+                loginState.error.clear();
+            } else {
+                loginState.error = result.empty() ? "Invalid key" : result;
+            }
+        }
+        
+        if (!canLogin) {
+            ImGui::PopStyleVar();
+        }
+        
+        // Pop frame padding style
+        ImGui::PopStyleVar();
+        
+        // Show error message if any
+        if (!loginState.error.empty()) {
+            ImGui::Spacing();
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.2f, 0.2f, 1.0f));
+            ImGui::TextWrapped("%s", loginState.error.c_str());
+            ImGui::PopStyleColor();
+        }
+    }
+    
+    ImGui::End();
+    ImGui::PopStyleVar(2);
+} else {
 
 if (itsmk){
 ImGui::SetNextWindowSize(ImVec2(685, 400), ImGuiCond_Once);
