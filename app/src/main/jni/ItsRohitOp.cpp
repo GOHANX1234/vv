@@ -358,31 +358,57 @@ bool clearMousePos = true;
 bool ImGuiOK = false;
 bool initImGui = false;
 
-void VerticalTab(const char* label, int tab_index, int* p_selected_tab, float buttonWidth, bool isExpanded) {
-ImGuiStyle& style = ImGui::GetStyle();
-
-// Set green color #2EFF2E for all tabs (selected or not)
-ImVec4 greenColor = ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f);
-// Set black color for text to make it visible on green background
-ImVec4 blackColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-// Push green color for button background (all states)
-ImGui::PushStyleColor(ImGuiCol_Button, greenColor);
-ImGui::PushStyleColor(ImGuiCol_ButtonHovered, greenColor);
-ImGui::PushStyleColor(ImGuiCol_ButtonActive, greenColor);
-// Push black color for text (visible on green)
-ImGui::PushStyleColor(ImGuiCol_Text, blackColor);
-
-// Align text: center for collapsed (icon only), left for expanded (icon + text)
-ImVec2 alignment = isExpanded ? ImVec2(0.0f, 0.5f) : ImVec2(0.5f, 0.5f);
-ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, alignment);
-
-if (ImGui::Button(label, ImVec2(buttonWidth, 50))) {
-*p_selected_tab = tab_index;
-}
-
-ImGui::PopStyleVar(1);
-ImGui::PopStyleColor(4);
+void VerticalTab(const char* icon, const char* text, int tab_index, int* p_selected_tab, float buttonWidth, bool isExpanded) {
+    const float collapsedWidth = 70.0f;
+    const float buttonHeight = 60.0f;
+    
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    
+    // Invisible button for hit detection
+    ImGui::PushID(tab_index);
+    bool clicked = ImGui::InvisibleButton("##tab", ImVec2(buttonWidth, buttonHeight));
+    bool isHovered = ImGui::IsItemHovered();
+    bool isSelected = (*p_selected_tab == tab_index);
+    ImGui::PopID();
+    
+    if (clicked) {
+        *p_selected_tab = tab_index;
+    }
+    
+    // Colors with selection and hover states
+    ImVec4 greenColor = ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f);
+    ImVec4 greenHover = ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f); // Brighter green on hover
+    ImVec4 greenSelected = ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f); // Slightly darker when selected
+    ImVec4 blackColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    
+    // Choose background color based on state
+    ImVec4 bgColorVec = isSelected ? greenSelected : (isHovered ? greenHover : greenColor);
+    ImU32 bgColor = ImGui::ColorConvertFloat4ToU32(bgColorVec);
+    
+    // Draw button background
+    draw_list->AddRectFilled(pos, ImVec2(pos.x + buttonWidth, pos.y + buttonHeight), bgColor, style.FrameRounding);
+    
+    // Calculate icon position - always centered in the collapsed width area
+    ImFont* font = ImGui::GetFont();
+    ImVec2 iconSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, icon);
+    
+    // Icon is always centered at collapsedWidth / 2
+    float iconX = pos.x + (collapsedWidth - iconSize.x) * 0.5f;
+    float iconY = pos.y + (buttonHeight - iconSize.y) * 0.5f;
+    
+    // Draw icon at fixed centered position
+    ImU32 textColor = ImGui::ColorConvertFloat4ToU32(blackColor);
+    draw_list->AddText(ImVec2(iconX, iconY), textColor, icon);
+    
+    // Draw text after the icon if expanded
+    if (isExpanded && text != nullptr) {
+        ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
+        float textX = pos.x + collapsedWidth + 5.0f; // 5px padding after icon area
+        float textY = pos.y + (buttonHeight - textSize.y) * 0.5f;
+        draw_list->AddText(ImVec2(textX, textY), textColor, text);
+    }
 }
 
 static int selected_tab = 0;
@@ -608,31 +634,48 @@ ImGui::BeginChild("LeftTabs", ImVec2(currentTabWidth + 20, 0), false);
 // Add vertical tabs with small spacing between them
 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 4.0f));
 
-// Toggle button for expand/collapse
+// Vertical tabs with icons centered and text appearing when expanded
+VerticalTab(ICON_FA_CROSSHAIRS, "AIM", 0, &selected_tab, currentTabWidth, isTabsExpanded);
+VerticalTab(ICON_FA_EYE, "ESP", 1, &selected_tab, currentTabWidth, isTabsExpanded);
+VerticalTab(ICON_FA_ELLIPSIS, "MORE", 2, &selected_tab, currentTabWidth, isTabsExpanded);
+VerticalTab(ICON_FA_ID_CARD, "INFO", 3, &selected_tab, currentTabWidth, isTabsExpanded);
+
+// MOVED: Toggle button at the end (last position) - using same custom rendering
+const char* toggleIcon = isTabsExpanded ? ICON_FA_ARROW_LEFT : ICON_FA_ARROW_RIGHT;
+const char* toggleText = isTabsExpanded ? "Close" : nullptr;
+
+ImGui::PushID(999);
+ImVec2 togglePos = ImGui::GetCursorScreenPos();
+bool toggleClicked = ImGui::InvisibleButton("##toggle", ImVec2(currentTabWidth, 60));
+ImGui::PopID();
+
+if (toggleClicked) {
+    isTabsExpanded = !isTabsExpanded;
+    targetTabWidth = isTabsExpanded ? 140.0f : 70.0f;
+}
+
+// Draw toggle button background
+ImDrawList* toggleDrawList = ImGui::GetWindowDrawList();
 ImVec4 greenColor = ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f);
 ImVec4 blackColor = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-ImGui::PushStyleColor(ImGuiCol_Button, greenColor);
-ImGui::PushStyleColor(ImGuiCol_ButtonHovered, greenColor);
-ImGui::PushStyleColor(ImGuiCol_ButtonActive, greenColor);
-ImGui::PushStyleColor(ImGuiCol_Text, blackColor);
+ImU32 toggleBgColor = ImGui::ColorConvertFloat4ToU32(greenColor);
+toggleDrawList->AddRectFilled(togglePos, ImVec2(togglePos.x + currentTabWidth, togglePos.y + 60), toggleBgColor, ImGui::GetStyle().FrameRounding);
 
-const char* toggleLabel = isTabsExpanded ? ICON_FA_ARROW_LEFT " Expanded" : ICON_FA_ARROW_RIGHT;
-if (ImGui::Button(toggleLabel, ImVec2(currentTabWidth, 50))) {
-    isTabsExpanded = !isTabsExpanded;
-    targetTabWidth = isTabsExpanded ? 160.0f : 70.0f;
+// Draw toggle icon centered
+ImFont* toggleFont = ImGui::GetFont();
+ImVec2 toggleIconSize = toggleFont->CalcTextSizeA(toggleFont->FontSize, FLT_MAX, 0.0f, toggleIcon);
+float toggleIconX = togglePos.x + (70.0f - toggleIconSize.x) * 0.5f;
+float toggleIconY = togglePos.y + (60 - toggleIconSize.y) * 0.5f;
+ImU32 toggleTextColor = ImGui::ColorConvertFloat4ToU32(blackColor);
+toggleDrawList->AddText(ImVec2(toggleIconX, toggleIconY), toggleTextColor, toggleIcon);
+
+// Draw toggle text if expanded
+if (toggleText != nullptr) {
+    ImVec2 toggleTextSize = toggleFont->CalcTextSizeA(toggleFont->FontSize, FLT_MAX, 0.0f, toggleText);
+    float toggleTextX = togglePos.x + 70.0f + 5.0f;
+    float toggleTextY = togglePos.y + (60 - toggleTextSize.y) * 0.5f;
+    toggleDrawList->AddText(ImVec2(toggleTextX, toggleTextY), toggleTextColor, toggleText);
 }
-ImGui::PopStyleColor(4);
-
-// Vertical tabs with dynamic labels
-const char* aimLabel = isTabsExpanded ? ICON_FA_CROSSHAIRS " AIM" : ICON_FA_CROSSHAIRS;
-const char* espLabel = isTabsExpanded ? ICON_FA_EYE " ESP" : ICON_FA_EYE;
-const char* moreLabel = isTabsExpanded ? ICON_FA_ELLIPSIS " MORE" : ICON_FA_ELLIPSIS;
-const char* infoLabel = isTabsExpanded ? ICON_FA_ID_CARD " INFO" : ICON_FA_ID_CARD;
-
-VerticalTab(aimLabel, 0, &selected_tab, currentTabWidth, isTabsExpanded);
-VerticalTab(espLabel, 1, &selected_tab, currentTabWidth, isTabsExpanded);
-VerticalTab(moreLabel, 2, &selected_tab, currentTabWidth, isTabsExpanded);
-VerticalTab(infoLabel, 3, &selected_tab, currentTabWidth, isTabsExpanded);
 
 ImGui::PopStyleVar(1);
 }
