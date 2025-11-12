@@ -585,16 +585,16 @@ std::string title = "DEXXTER MOD APK V1";
     bool is_hovering = ImGui::IsWindowHovered();
     bool is_left_clicked = ImGui::IsMouseClicked(0);
 
-    // Red circle
+    // Purple/Magenta circle
     ImVec2 red_circle_center = ImVec2(window_pos.x + initial_x_offset, circle_y_pos);
-    draw_list->AddCircleFilled(red_circle_center, circle_radius, IM_COL32(255, 95, 86, 255));
+    draw_list->AddCircleFilled(red_circle_center, circle_radius, IM_COL32(200, 50, 200, 255));
     if (is_hovering && is_left_clicked && ImVec2(mouse_pos.x - red_circle_center.x, mouse_pos.y - red_circle_center.y).x * (mouse_pos.x - red_circle_center.x) + (mouse_pos.y - red_circle_center.y) * (mouse_pos.y - red_circle_center.y) < circle_radius * circle_radius) {
         itsmk = false;
     }
 
-    // Yellow circle
+    // Red circle
     ImVec2 yellow_circle_center = ImVec2(window_pos.x + initial_x_offset + circle_spacing, circle_y_pos);
-    draw_list->AddCircleFilled(yellow_circle_center, circle_radius, IM_COL32(254, 189, 47, 255));
+    draw_list->AddCircleFilled(yellow_circle_center, circle_radius, IM_COL32(255, 95, 86, 255));
     if (is_hovering && is_left_clicked && ImVec2(mouse_pos.x - yellow_circle_center.x, mouse_pos.y - yellow_circle_center.y).x * (mouse_pos.x - yellow_circle_center.x) + (mouse_pos.y - yellow_circle_center.y) * (mouse_pos.y - yellow_circle_center.y) < circle_radius * circle_radius) {
         itsmk = false;
     }
@@ -692,74 +692,126 @@ switch (selected_tab) {
 ImGui::Text("Safe Settings Content");
 break;
 case 0: // AIM
-ImGui::Dummy(ImVec2(0, 0.5f));
-ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
-ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
-ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
-ImGui::Button(" AIM ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-ImGui::PopStyleColor(3);
-ImGui::PopStyleVar();
-ImGui::Separator();
-ImGui::Spacing();
-ImGui::Checkbox("ENABLE AIMKILL ", &Config.Aimbot.aimkill);
-ImGui::Spacing();
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+    ImGui::Button(" AIM ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
+    ImGui::PopStyleColor(4);
+    ImGui::PopStyleVar();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::Checkbox("ENABLE AIMKILL ", &Config.Aimbot.aimkill);
+    ImGui::Spacing();
 
-ImGui::Spacing();
+    ImGui::Spacing();
 
-// ImGui::PopItemWidth();
-break;
+    break;
+}
 case 1: // ESPS
-ImGui::Dummy(ImVec2(0, 0.5f));
-ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
-ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
-ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
-ImGui::Button(" ESP ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-ImGui::PopStyleColor(3);
-ImGui::PopStyleVar();
-ImGui::Separator();
-ImGui::Spacing();
-ImGui::Checkbox("ENABLE ESP", &Enable);
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+    ImGui::Button(" ESP ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
+    ImGui::PopStyleColor(4);
+    ImGui::PopStyleVar();
+    ImGui::Separator();
+    ImGui::Spacing();
 
-ImGui::Checkbox("DRAW LINE", &Config.ESP.Line);
-ImGui::SameLine();
-ImGui::ColorEdit3("##LineColor", (float*)&Config.ESP.LineColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    // Calculate layout dimensions
+    float colorBoxSize = 30.0f;
+    float columnGap = 60.0f;
 
-ImGui::Checkbox("DRAW BOX", &Config.ESP.Box);
-ImGui::SameLine();
-ImGui::ColorEdit3("##BoxColor", (float*)&Config.ESP.BoxColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    // LEFT COLUMN - BeginGroup for precise control
+    ImGui::BeginGroup();
+    {
+        // ENABLE ESP
+        ImGui::Checkbox("ENABLE ESP", &Enable);
+        ImGui::SameLine();
+        ImGui::Dummy(ImVec2(colorBoxSize, 0));
+        
+        // DRAW LINE
+        ImGui::Checkbox("DRAW LINE", &Config.ESP.Line);
+        ImGui::SameLine();
+        ImGui::PushItemWidth(colorBoxSize);
+        ImGui::ColorEdit3("##LineColor", (float*)&Config.ESP.LineColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+        ImGui::PopItemWidth();
+        
+        // DRAW BOX
+        ImGui::Checkbox("DRAW BOX", &Config.ESP.Box);
+        ImGui::SameLine();
+        ImGui::PushItemWidth(colorBoxSize);
+        ImGui::ColorEdit3("##BoxColor", (float*)&Config.ESP.BoxColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+        ImGui::PopItemWidth();
+    }
+    ImGui::EndGroup();
 
-ImGui::Checkbox("DRAW NAME", &Config.ESP.IsName);
-ImGui::SameLine();
-ImGui::ColorEdit3("##NameColor", (float*)&Config.ESP.NameColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    // Get the starting Y position of left column for alignment
+    float leftGroupStartY = ImGui::GetItemRectMin().y;
 
-ImGui::Checkbox("DRAW DSITANCE", &Config.ESP.Distance);
-ImGui::SameLine();
-ImGui::ColorEdit3("##DistanceColor", (float*)&Config.ESP.DistanceColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+    // RIGHT COLUMN - Position and create second group
+    ImGui::SameLine(0.0f, columnGap);
+    ImGui::SetCursorPosY(leftGroupStartY);
+    ImGui::BeginGroup();
+    {
+        // DRAW NAME (aligns with ENABLE ESP)
+        ImGui::Checkbox("DRAW NAME", &Config.ESP.IsName);
+        ImGui::SameLine();
+        ImGui::PushItemWidth(colorBoxSize);
+        ImGui::ColorEdit3("##NameColor", (float*)&Config.ESP.NameColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+        ImGui::PopItemWidth();
+        
+        // DRAW DISTANCE (aligns with DRAW LINE)
+        ImGui::Checkbox("DRAW DSITANCE", &Config.ESP.Distance);
+        ImGui::SameLine();
+        ImGui::PushItemWidth(colorBoxSize);
+        ImGui::ColorEdit3("##DistanceColor", (float*)&Config.ESP.DistanceColor, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+        ImGui::PopItemWidth();
+        
+        // DRAW HEALTH (aligns with DRAW BOX)
+        ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
+    }
+    ImGui::EndGroup();
 
-ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
-
-break;
+    break;
+}
 case 2: // MORE
-ImGui::Dummy(ImVec2(0, 0.5f));
-ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
-ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
-ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
-ImGui::Button(" MORE ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
-ImGui::PopStyleColor(3);
-ImGui::PopStyleVar();
-ImGui::Separator();
-ImGui::Spacing();
-ImGui::Checkbox("ENABLE  SPPED 50X", &SpeedHack);
-break;
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+    ImGui::Button(" MORE ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
+    ImGui::PopStyleColor(4);
+    ImGui::PopStyleVar();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::Checkbox("ENABLE  SPPED 50X", &SpeedHack);
+    break;
+}
 case 3: // INFOS
-ImGui::BulletText("WELCOME TO DEXXTER MOD APK V1");
-                                float fps = ImGui::GetIO().Framerate;
-                ImGui::BulletText(" FPS Render Game : %.1f", fps);
-                                
-break;
+{
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(46.0f/255.0f, 255.0f/255.0f, 46.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(56.0f/255.0f, 255.0f/255.0f, 56.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(36.0f/255.0f, 245.0f/255.0f, 36.0f/255.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+    ImGui::Button(" INFO ", ImVec2(ImGui::GetContentRegionAvailWidth(), 0));
+    ImGui::PopStyleColor(4);
+    ImGui::PopStyleVar();
+    ImGui::Separator();
+    ImGui::Spacing();
+    ImGui::BulletText("WELCOME TO DEXXTER MOD APK V1");
+    float fps = ImGui::GetIO().Framerate;
+    ImGui::BulletText(" FPS Render Game : %.1f", fps);
+    break;
+}
 }
 }
 ImGui::EndChild();
