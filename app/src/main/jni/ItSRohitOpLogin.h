@@ -48,6 +48,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
     return realsize;
 }
 
+namespace Auth {
 
 const char *GetAndroidID(JNIEnv *env, jobject context) {
     jclass contextClass = env->FindClass(/*android/content/Context*/ StrEnc("`L+&0^[S+-:J^$,r9q92(as", "\x01\x22\x4F\x54\x5F\x37\x3F\x7C\x48\x42\x54\x3E\x3B\x4A\x58\x5D\x7A\x1E\x57\x46\x4D\x19\x07", 23).c_str());
@@ -91,6 +92,8 @@ const char *GetDeviceUniqueIdentifier(JNIEnv *env, const char *uuid) {
     auto str = (jstring) env->CallObjectMethod(obj, toStringMethod);
     return env->GetStringUTFChars(str, 0);
 }
+
+} // namespace Auth
 
 void OpenURL(const char* url) {
     if (!Tools::jvm) return;
@@ -153,7 +156,7 @@ std::string CheckForUpdates() {
     }
 
     if (curl) {
-        std::string api_url = std::string((const char*)OBFUSCATE("https://nikumodsexe.onrender.com/api/updates"));
+        std::string api_url = std::string((const char*)OBFUSCATE("https://dexxterxpro.onrender.com/api/updates"));
         curl_easy_setopt(curl, CURLOPT_URL, api_url.c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");
@@ -232,10 +235,10 @@ std::string Login(const char *user_key) {
     jobject mInitialApplication = env->GetObjectField(sCurrentActivityThread, mInitialApplicationField);
 
     std::string hwid = user_key;
-    hwid += Tools::GetAndroidID(env, mInitialApplication);
-    hwid += Tools::GetDeviceModel(env);
-    hwid += Tools::GetDeviceBrand(env);
-    std::string UUID = Tools::GetDeviceUniqueIdentifier(env, hwid.c_str());
+    hwid += Tools::Auth::GetAndroidID(env, mInitialApplication);
+    hwid += Tools::Auth::GetDeviceModel(env);
+    hwid += Tools::Auth::GetDeviceBrand(env);
+    std::string UUID = Tools::Auth::GetDeviceUniqueIdentifier(env, hwid.c_str());
     Tools::jvm->DetachCurrentThread();
     std::string errMsg;
 
@@ -255,7 +258,7 @@ std::string Login(const char *user_key) {
     }
 
     if (curl) {
-        std::string api_key = std::string((const char*)OBFUSCATE("https://nikumodsexe.onrender.com/api/verify"));
+        std::string api_key = std::string((const char*)OBFUSCATE("https://dexxterxpro.onrender.com/api/verify"));
         curl_easy_setopt(curl, CURLOPT_URL, (api_key.c_str()));
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(curl, CURLOPT_DEFAULT_PROTOCOL, "https");

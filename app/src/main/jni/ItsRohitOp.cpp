@@ -580,7 +580,7 @@ if (!loginState.isAuthenticated) {
         // Key input box
         ImGui::Text(ICON_FA_KEY " Key:");
         ImGui::PushItemWidth(-1);
-        ImGui::InputTextWithHint("##KeyInput", "Enter your activation key", 
+        ImGui::InputTextWithHint("##KeyInput", "Enter key", 
             loginState.key, IM_ARRAYSIZE(loginState.key));
         ImGui::PopItemWidth();
         
@@ -744,22 +744,6 @@ if (!loginState.isAuthenticated) {
             
             if (ImGui::Button(downloadBtnText.c_str(), ImVec2(windowWidth, buttonHeight))) {
                 Tools::OpenURL(update.linkUrl.c_str());
-            }
-            
-            ImGui::PopStyleColor(4);
-            ImGui::PopStyleVar();
-            
-            ImGui::Spacing();
-            
-            // Later button
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 8.0f);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.8f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.1f, 0.1f, 1.0f));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-            
-            if (ImGui::Button(ICON_FA_CLOCK " Continue Without Updating", ImVec2(windowWidth, 40))) {
-                loginState.updateModalShown = true;
             }
             
             ImGui::PopStyleColor(4);
