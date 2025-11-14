@@ -36,7 +36,6 @@
 #include "Icon/OPPOSans-H.h"
 #include "Rohit/Icon.h"
 #include "Rohit/Iconcpp.h"
-#include "KillFeedCustomizer.h"
 
 static int TAB = 1;;
 
@@ -527,7 +526,6 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
         
         UpdateSpeedhack();
         DrawESP(g_GlWidth, g_GlHeight);
-        ProcessKillFeedNotifications();
     
     static bool itsmk = true;
 static bool clickInProgress = false;
